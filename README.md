@@ -5,7 +5,9 @@ This Repository uses Tweetdeck to schedule tweets written for BigYellow_GPT2, It
 it requires 
 Geckodriver
 >https://github.com/mozilla/geckodriver/releases
+
 and a Modified verison of schedule-tweet as featured below
+
 >https://github.com/danielh2942/schedule-tweet
 
 usage is as follows 

@@ -3,6 +3,7 @@ import schedule_tweet
 from datetime import datetime, timedelta
 
 #GLOBALS
+#TODO Make a Class for all of this information
 username = "USERNAME"
 password = "PASSWORD"
 curr_file = ""
@@ -14,6 +15,8 @@ scheduled = []
 approved = 0
 refused = 0
 save_file = ""
+start_hour = 11
+end_hour = 23
 
 def int_selection():
 	while(1):
@@ -28,13 +31,14 @@ def load(saves):
 	global s_time
 	global curr_file
 	global tweet_position
+	global save_file
 	count = 0
 	if(len(saves) == 1):
 		print("Loading %s" % (saves[0]))
 		save_file = saves[0]
 	else:
 		for i in range(0,len(saves)):
-			print("%d %d" % (i,saves[i]))
+			print("%d %s" % (i,saves[i]))
 		while(1):
 			selection = int_selection()
 			if(selection >= len(saves)):
@@ -115,7 +119,7 @@ def load_tweets():
 			tweets.append(curr_line)
 	print("File Opened Successfully!")
 	read_file.close()
-
+	#TODO handle tweets that exceed the 280 character limit
 	print("y = schedule n = Refuse x = Quit")
 	while(True):
 		print("%s"%(tweets[tweet_position]))
@@ -128,10 +132,21 @@ def load_tweets():
 		elif (tweet_position == 999 or "x" in selection or approved == 300):
 			if(tweet_position ==  999):
 				print("File has been Exhausted!")
+				#TODO file rollover
 			break
 		tweet_position = tweet_position + 1
 	if (approved == 0 and refused == 0):
 		exit
+
+
+#I Really do not know if this works but it's here regardless
+def time_handler(dt,change_minutes):
+	global start_hour
+	global end_hour
+	dt = dt + timedelta(minutes=change_minutes)
+	if (dt.hour == end_hour):
+		dt = dt + timedelta(hours=(end_hour - start_hour))
+	return dt
 
 def upload():
 	#Tweet Dump
@@ -142,11 +157,12 @@ def upload():
 	with schedule_tweet.session(username,password) as session:
 		for i in scheduled:
 			session.tweet(s_time,i)
-			s_time = s_time + timedelta(minutes=30)
+			s_time = time_handler(s_time,30)
 	ratio = (approved/(approved+refused)) * 100
 	print("Current Position: %s, Approved: %s, Refused: %s, Percent Approved: %s%%" % (tweet_position,approved,refused,ratio))
 
 def main():
+	global save_file
 	save_selected = 0
 	print("Tweet Scheduler Version 2\nWritten by Daniel Hannon")
 	saves = glob.glob("saves/*.txt")
